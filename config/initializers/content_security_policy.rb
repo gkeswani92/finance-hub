@@ -12,13 +12,10 @@ Rails.application.configure do
     # For directives that are not defined here, they will fallback to default-src
     policy.default_src(:self)
 
-    if Rails.env.development?
-      policy.img_src(:self, :data)
-    else
-      policy.img_src(:self, :data, "cdn.shopify.com")
-      policy.script_src("cdn.shopify.com")
-      policy.style_src("cdn.shopify.com")
-    end
+    policy.img_src(:self, :data)
+    policy.script_src(:self, "cdn.tailwindcss.com", "cdn.jsdelivr.net")
+    policy.style_src(:self, :unsafe_inline)
+    policy.connect_src(:self, "cdn.jsdelivr.net")
 
     # Disable <embed>, <object> and <applet> tags
     policy.object_src(:none)

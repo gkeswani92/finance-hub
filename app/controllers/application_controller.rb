@@ -4,4 +4,5 @@
 class ApplicationController < ActionController::Base
   include Minerva::Authentication
   include ShopifySecurityBase::ClickjackingProtection
+  skip_idor_protection
 end

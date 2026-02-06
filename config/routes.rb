@@ -2,13 +2,24 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  root "dashboard#index"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  resources :accounts do
+    collection do
+      get :bulk_update
+      post :save_bulk_update
+    end
+    resources :snapshots, only: [:create]
+  end
+
+  get "settings", to: "settings#index"
+
+  # JSON endpoints for charts
+  namespace :api do
+    get "net_worth_history", to: "charts#net_worth_history"
+    get "sankey_data", to: "charts#sankey_data"
+  end
+
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Defines the root path route ("/")
-  # root "articles#index"
-  get "/" => redirect("https://rubyonrails.org")
 end
