@@ -1,0 +1,59 @@
+name: finance-hub
+dev.edition: 2024
+type: rails
+
+up:
+  - ruby
+  - bundler
+  - redis
+  - memcached
+  # - toxiproxy
+  - mysql
+  # - elasticsearch
+  # - zookeeper
+  # - magellan
+  - nginx
+  # - kafka
+  - database:
+      bootstrap: bin/rails db:setup db:test:prepare
+      migrate: bin/rails db:migrate db:test:prepare
+      database: finance_hub_development
+
+commands:
+  server:
+    run: bin/rails server --binding ${SERVER_HOST:-0.0.0.0} --port ${SERVER_PORT}
+    desc: 'run the rails server'
+  console: bin/rails console
+  test:
+    syntax:
+      argument: file
+      optional: args...
+    run: cd $USER_PWD && bin/rails test $@
+  typecheck:
+    desc: 'run Sorbet typechecking'
+    aliases: ['tc']
+    run: bundle exec srb tc
+    subcommands:
+      ruby:
+        desc: 'run Sorbet typechecking'
+        run: bundle exec srb tc
+  update-rbis:
+    desc: 'updates the RBI files corresponding to gems listed in the Gemfile'
+    run: bin/tapioca gem
+  style:
+    desc: 'Run rubocop'
+    run: cd $USER_PWD && bundle exec rubocop
+    subcommands:
+      ruby:
+        syntax:
+          optional: --include-branch-commits --all-cops
+        desc: 'Run Rubocop checks. Add --include-branch-commits to run on all files changed on the current branch. Add --all-cops to run all the cops.'
+        run: cd $USER_PWD && bundle exec rubocop
+
+# These use fuzzy-matching, so you can (e.g.) `dev open app`
+open:
+  'My Application': https://finance-hub.shop.dev
+  #ops:
+  # - https://datadog.link
+  # - https://bugsnag.link
+  # - https://kafka.link

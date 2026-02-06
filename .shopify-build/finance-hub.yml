@@ -1,0 +1,26 @@
+containers:
+  default:
+    build:
+      from: ubuntu-24
+      type: ci
+
+steps:
+  - label: ":ruby: Ruby Tests"
+    timeout: 10m
+    services:
+      redis: alpine
+      mysql:
+        image: "percona/percona-server:8.0.34"
+        command: mysqld
+    run:
+      - bundle: ~
+      - bin/rails db:setup
+      - bin/rails test
+
+  - label: ":rubocop: Ruby Lint"
+    timeout: 10m
+    run:
+      - bundle: ~
+      - bundle exec rubocop
+    cache:
+      - tmp/rubocop
