@@ -1,0 +1,70 @@
+<div class="p-8">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Accounts</h2>
+    <%= link_to "New Account", new_account_path, class: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700" %>
+  </div>
+
+  <!-- Owner filter tabs -->
+  <div class="flex gap-2 mb-6">
+    <%= link_to "All", accounts_path, class: "px-3 py-1.5 rounded-lg text-sm font-medium #{params[:owner_id].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+    <% @owners.each do |owner| %>
+      <%= link_to owner.name, accounts_path(owner_id: owner.id), class: "px-3 py-1.5 rounded-lg text-sm font-medium #{params[:owner_id].to_s == owner.id.to_s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+    <% end %>
+  </div>
+
+  <% @categories.each do |category| %>
+    <% category_accounts = @accounts.select { |a| a.category_id == category.id } %>
+    <% next if category_accounts.empty? %>
+
+    <div class="mb-6">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+        <%= category.name %>
+        <span class="text-gray-400 font-normal">
+          (<%= format_currency(category_accounts.sum(&:latest_value)) %>)
+        </span>
+      </h3>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Institution</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Value</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Last Updated</th>
+              <th class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% category_accounts.each do |account| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                  <%= link_to account.name, account_path(account), class: "hover:text-blue-600" %>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500"><%= account.owner.name %></td>
+                <td class="px-6 py-4 text-sm text-gray-500"><%= account.institution %></td>
+                <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">
+                  <%= format_currency(account.latest_value, account.currency) %>
+                </td>
+                <td class="px-6 py-4 text-sm text-right text-gray-500">
+                  <%= account.latest_snapshot&.snapshot_date&.strftime("%b %d, %Y") || "—" %>
+                </td>
+                <td class="px-6 py-4 text-right text-sm">
+                  <%= link_to "Edit", edit_account_path(account), class: "text-blue-600 hover:text-blue-800" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @accounts.empty? %>
+    <div class="text-center py-12 text-gray-500">
+      <p class="text-lg">No accounts yet.</p>
+      <p class="mt-2"><%= link_to "Create your first account", new_account_path, class: "text-blue-600 hover:text-blue-800" %></p>
+    </div>
+  <% end %>
+</div>
