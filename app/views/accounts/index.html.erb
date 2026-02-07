@@ -43,7 +43,6 @@
                 <th style="width:14%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Value</th>
                 <th style="width:9%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">CAGR</th>
                 <th style="width:13%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Updated</th>
-                <th style="width:6%" class="px-6 py-3"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -65,9 +64,6 @@
                   </td>
                   <td class="px-6 py-4 text-sm text-right text-gray-400 truncate">
                     <%= account.latest_snapshot&.snapshot_date&.strftime("%b %d, %Y") || "—" %>
-                  </td>
-                  <td class="px-6 py-4 text-right text-sm">
-                    <%= link_to "Edit", edit_account_path(account), class: "text-teal-600 hover:text-teal-700" %>
                   </td>
                 </tr>
               <% end %>
@@ -92,7 +88,7 @@
                     <span class="text-gray-300">—</span>
                   <% end %>
                 </td>
-                <td colspan="2"></td>
+                <td></td>
               </tr>
             </tbody>
           </table>
@@ -105,6 +101,41 @@
     <div class="text-center py-12 text-gray-400">
       <p class="text-lg">No accounts yet.</p>
       <p class="mt-2"><%= link_to "Create your first account", new_account_path, class: "text-teal-600 hover:text-teal-700" %></p>
+    </div>
+  <% end %>
+
+  <% if @archived_accounts.any? %>
+    <div class="mt-10">
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Archived</h3>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full table-fixed divide-y divide-gray-100">
+          <thead>
+            <tr>
+              <th style="width:30%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
+              <th style="width:20%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
+              <th style="width:15%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Owner</th>
+              <th style="width:20%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Last Value</th>
+              <th style="width:15%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <% @archived_accounts.each do |account| %>
+              <tr class="hover:bg-gray-50/50 transition-colors text-gray-400">
+                <td class="px-6 py-4 text-sm truncate"><%= link_to account.name, account_path(account), class: "hover:text-teal-600" %></td>
+                <td class="px-6 py-4 text-sm truncate"><%= account.category&.name %></td>
+                <td class="px-6 py-4 text-sm truncate"><%= account.owner&.name %></td>
+                <td class="px-6 py-4 text-sm text-right truncate">
+                  <% last_nonzero = account.value_snapshots.where.not(value: 0).order(snapshot_date: :desc).first %>
+                  <%= last_nonzero ? format_currency(last_nonzero.value, account.currency) : "—" %>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <%= button_to "Unarchive", unarchive_account_path(account), method: :patch, class: "text-sm text-teal-600 hover:text-teal-700 font-medium cursor-pointer" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   <% end %>
 </div>

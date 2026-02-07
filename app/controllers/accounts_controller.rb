@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 class AccountsController < ApplicationController
-  before_action :set_account, only: [:show, :edit, :update, :destroy]
+  before_action :set_account, only: [:show, :edit, :update, :destroy, :unarchive]
 
   def index
     @accounts = Account.active.includes(:category, :owner, :value_snapshots)
@@ -11,10 +11,13 @@ class AccountsController < ApplicationController
 
     @owners = Owner.all
     @categories = Category.all.sort_by { |c| -@accounts.select { |a| a.category_id == c.id }.sum(&:latest_value_usd) }
+    @archived_accounts = Account.where(is_active: false).includes(:category, :owner, :value_snapshots)
+    @archived_accounts = @archived_accounts.where(owner_id: params[:owner_id]) if params[:owner_id].present?
   end
 
   def show
     @snapshots = @account.value_snapshots.order(snapshot_date: :desc)
+    load_form_data
   end
 
   def new
@@ -34,21 +37,32 @@ class AccountsController < ApplicationController
   end
 
   def edit
-    load_form_data
+    redirect_to(account_path(@account))
   end
 
   def update
     if @account.update(account_params)
-      redirect_to(accounts_path, notice: "Account updated.")
+      redirect_to(account_path(@account), notice: "Account updated.")
     else
+      @snapshots = @account.value_snapshots.order(snapshot_date: :desc)
       load_form_data
-      render(:edit, status: :unprocessable_entity)
+      render(:show, status: :unprocessable_entity)
     end
   end
 
   def destroy
     @account.update!(is_active: false)
+    @account.value_snapshots.find_or_create_by!(snapshot_date: Date.current) do |s|
+      s.value = 0
+    end.tap { |s| s.update!(value: 0) }
     redirect_to(accounts_path, notice: "Account archived.")
+  end
+
+  def unarchive
+    @account.update!(is_active: true)
+    # Remove the $0 archive snapshot if it exists for today
+    @account.value_snapshots.where(snapshot_date: Date.current, value: 0).destroy_all
+    redirect_to(accounts_path, notice: "Account unarchived.")
   end
 
   def bulk_update

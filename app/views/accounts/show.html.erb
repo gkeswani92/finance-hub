@@ -1,13 +1,19 @@
 <div class="p-8">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h2 class="text-2xl font-bold text-gray-900 tracking-tight"><%= @account.name %></h2>
-      <p class="text-sm text-gray-400 mt-1">
-        <%= @account.owner.name %> &middot; <%= @account.category.name %> &middot; <%= @account.institution %>
-      </p>
+      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
+        <%= @account.name %>
+        <% unless @account.is_active %>
+          <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Archived</span>
+        <% end %>
+      </h2>
     </div>
-    <div class="flex gap-3">
-      <%= link_to "Edit", edit_account_path(@account), class: "text-sm text-teal-600 hover:text-teal-700" %>
+    <div class="flex gap-3 items-center">
+      <% if @account.is_active %>
+        <%= button_to "Archive", account_path(@account), method: :delete, class: "text-sm text-red-500 hover:text-red-600 font-medium cursor-pointer", data: { turbo_confirm: "Archive this account? It will be hidden from active lists but its history will be preserved." } %>
+      <% else %>
+        <%= button_to "Unarchive", unarchive_account_path(@account), method: :patch, class: "text-sm text-teal-600 hover:text-teal-700 font-medium cursor-pointer" %>
+      <% end %>
       <%= link_to "Back", accounts_path, class: "text-sm text-gray-400 hover:text-gray-600" %>
     </div>
   </div>
@@ -62,20 +68,59 @@
     <% end %>
   </div>
 
-  <!-- Record New Value -->
+  <!-- Account Details -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Record Value</h3>
-    <%= form_with(model: [@account, ValueSnapshot.new], url: account_snapshots_path(@account)) do |f| %>
-      <div class="flex gap-4 items-end">
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Date</label>
-          <%= f.date_field :snapshot_date, value: Date.current, class: "rounded-lg border-gray-300 shadow-sm text-sm focus:ring-teal-500 focus:border-teal-500" %>
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Account Details</h3>
+    <%= form_with(model: @account, class: "space-y-6") do |f| %>
+      <% if @account.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <ul class="list-disc list-inside text-sm text-red-600">
+            <% @account.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
         </div>
+      <% end %>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Value (<%= @account.currency %>)</label>
-          <%= f.number_field :value, step: 0.01, class: "rounded-lg border-gray-300 shadow-sm text-sm focus:ring-teal-500 focus:border-teal-500", required: true %>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Name</label>
+          <%= f.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm", required: true %>
         </div>
-        <%= f.submit "Save", class: "bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Institution</label>
+          <%= f.text_field :institution, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Owner</label>
+          <%= f.collection_select :owner_id, @owners, :id, :name, { prompt: "Select owner" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Category</label>
+          <%= f.collection_select :category_id, @categories, :id, :name, { prompt: "Select category" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Currency</label>
+          <%= f.select :currency, [["USD ($)", "USD"], ["INR (₹)", "INR"]], {}, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Cost Basis</label>
+          <%= f.number_field :cost_basis, step: 0.01, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Notes</label>
+        <%= f.text_area :notes, rows: 3, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+      </div>
+
+      <div>
+        <%= f.submit "Save", class: "bg-teal-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
       </div>
     <% end %>
   </div>
@@ -102,9 +147,27 @@
           <% if @account.currency != "USD" %>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">USD Value</th>
           <% end %>
+          <th class="px-6 py-3"></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-50">
+        <!-- Record new value row -->
+        <tr class="bg-gray-50/50">
+          <%= form_with(model: [@account, ValueSnapshot.new], url: account_snapshots_path(@account)) do |f| %>
+            <td class="px-6 py-3">
+              <%= f.date_field :snapshot_date, value: Date.current, class: "rounded-lg border-gray-300 shadow-sm text-sm focus:ring-teal-500 focus:border-teal-500" %>
+            </td>
+            <td class="px-6 py-3 text-right">
+              <%= f.number_field :value, step: 0.01, placeholder: @account.currency, class: "rounded-lg border-gray-300 shadow-sm text-sm focus:ring-teal-500 focus:border-teal-500 w-32 text-right", required: true %>
+            </td>
+            <% if @account.currency != "USD" %>
+              <td class="px-6 py-3"></td>
+            <% end %>
+            <td class="px-6 py-3 text-right">
+              <%= f.submit "Save", class: "bg-teal-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
+            </td>
+          <% end %>
+        </tr>
         <% @snapshots.each do |snapshot| %>
           <tr class="hover:bg-gray-50/50 transition-colors">
             <td class="px-6 py-4 text-sm text-gray-900"><%= snapshot.snapshot_date.strftime("%b %d, %Y") %></td>
@@ -117,11 +180,12 @@
                 <%= format_currency(snapshot.value / fx_rate, "USD") %>
               </td>
             <% end %>
+            <td class="px-6 py-4"></td>
           </tr>
         <% end %>
         <% if @snapshots.empty? %>
           <tr>
-            <td colspan="<%= @account.currency != 'USD' ? 3 : 2 %>" class="px-6 py-8 text-center text-gray-400">No snapshots yet.</td>
+            <td colspan="<%= @account.currency != 'USD' ? 4 : 3 %>" class="px-6 py-8 text-center text-gray-400">No snapshots yet.</td>
           </tr>
         <% end %>
       </tbody>

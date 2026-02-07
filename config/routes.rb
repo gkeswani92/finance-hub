@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       get :bulk_update
       post :save_bulk_update
     end
+    member do
+      patch :unarchive
+    end
     resources :snapshots, only: [:create]
   end
 
