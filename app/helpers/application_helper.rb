@@ -4,8 +4,12 @@
 module ApplicationHelper
   def sidebar_link(label, path, icon_path)
     active = current_page?(path)
-    base = "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-    classes = active ? "#{base} bg-gray-800 text-white" : "#{base} text-gray-300 hover:bg-gray-800 hover:text-white"
+    base = "flex items-center px-3 py-2 text-sm font-medium transition-colors border-l-2"
+    classes = if active
+      "#{base} border-teal-600 bg-teal-50 text-teal-700"
+    else
+      "#{base} border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+    end
 
     link_to(path, class: classes, data: { turbo_frame: "_top" }) do
       tag.svg(
@@ -23,5 +27,13 @@ module ApplicationHelper
   def format_currency(amount, currency = "USD")
     prefix = currency == "INR" ? "\u20B9" : "$"
     "#{prefix}#{number_with_delimiter(amount.to_i)}"
+  end
+
+  def format_currency_dual(account)
+    usd = format_currency(account.latest_value_usd, "USD")
+    return usd if account.currency == "USD"
+
+    native = format_currency(account.latest_value, account.currency)
+    tag.div(usd) + tag.div(native, class: "text-gray-400 text-xs")
   end
 end
