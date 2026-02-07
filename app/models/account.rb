@@ -29,6 +29,32 @@ class Account < ApplicationRecord
     val / fx_rate
   end
 
+  def first_snapshot_date
+    value_snapshots.minimum(:snapshot_date)
+  end
+
+  def cagr
+    return if cost_basis.nil? || cost_basis.zero?
+
+    current = latest_value
+    return if current.zero?
+
+    start_date = first_snapshot_date
+    return unless start_date
+
+    days = (Date.current - start_date).to_f
+    return if days < 1
+
+    ((current / cost_basis)**(365.0 / days)) - 1
+  end
+
+  def cagr_display
+    rate = cagr
+    return "—" unless rate
+
+    format("%+.1f%%", rate * 100)
+  end
+
   def debt?
     category&.is_debt?
   end
