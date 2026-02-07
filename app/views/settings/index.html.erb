@@ -42,7 +42,6 @@
             <%= f.check_box :is_debt, class: "rounded border-gray-300 text-teal-600 focus:ring-teal-500" %>
             Debt
           </label>
-          <%= f.hidden_field :display_order, value: (@categories.map(&:display_order).max || 0) + 1 %>
           <%= f.submit "Add", class: "bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
         </div>
       <% end %>
@@ -51,7 +50,6 @@
         <thead>
           <tr class="border-b border-gray-100">
             <th class="pb-2 text-left text-xs font-medium text-gray-400 uppercase">Name</th>
-            <th class="pb-2 text-center text-xs font-medium text-gray-400 uppercase w-16">Order</th>
             <th class="pb-2 text-center text-xs font-medium text-gray-400 uppercase w-16">Type</th>
             <th class="pb-2 text-right text-xs font-medium text-gray-400 uppercase w-24">Accounts</th>
             <th class="pb-2 w-24"></th>
@@ -63,9 +61,6 @@
               <%= form_with(model: category, url: settings_category_path(category), method: :patch) do |f| %>
                 <td class="py-3 pr-3">
                   <%= f.text_field :name, class: "w-full rounded-lg border-gray-200 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
-                </td>
-                <td class="py-3 px-2">
-                  <%= f.number_field :display_order, class: "w-full rounded-lg border-gray-200 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm text-center" %>
                 </td>
                 <td class="py-3 px-2 text-center">
                   <% if category.is_debt? %>

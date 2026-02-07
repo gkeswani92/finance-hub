@@ -54,6 +54,14 @@ class SettingsController < ApplicationController
     end
   end
 
+  def reorder_categories
+    ids = params[:ids] || []
+    ids.each_with_index do |id, index|
+      Category.where(id: id).update_all(display_order: index + 1)
+    end
+    head(:ok)
+  end
+
   private
 
   def owner_params
