@@ -29,6 +29,25 @@ module ApplicationHelper
     "#{prefix}#{number_with_delimiter(amount.to_i)}"
   end
 
+  def format_currency_human(amount)
+    abs = amount.to_i.abs
+    if abs >= 1_000_000
+      millions = abs / 1_000_000.0
+      formatted = format("%.3f", millions)
+      sign = amount < 0 ? "-" : ""
+      tag.span(class: "inline-flex items-baseline gap-1") do
+        tag.span("#{sign}$", class: "text-lg font-medium text-gray-400") +
+          tag.span(formatted, class: "text-5xl font-bold tracking-tight") +
+          tag.span("Million", class: "text-lg font-medium text-gray-400 ml-1")
+      end
+    else
+      tag.span(class: "inline-flex items-baseline gap-1") do
+        tag.span("$", class: "text-lg font-medium text-gray-400") +
+          tag.span(number_with_delimiter(abs), class: "text-5xl font-bold tracking-tight")
+      end
+    end
+  end
+
   def format_currency_dual(account)
     usd = format_currency(account.latest_value_usd, "USD")
     return usd if account.currency == "USD"
