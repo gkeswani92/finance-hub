@@ -1,7 +1,7 @@
 <div class="p-8">
   <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-6">Settings</h2>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Owners -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Owners</h3>
@@ -15,9 +15,9 @@
       <ul class="divide-y divide-gray-100">
         <% @owners.each do |owner| %>
           <li class="py-3 flex items-center justify-between">
-            <span class="text-sm text-gray-900"><%= owner.name %></span>
+            <span class="text-sm font-medium text-gray-900"><%= owner.name %></span>
             <span class="flex items-center gap-3">
-              <span class="text-xs text-gray-300"><%= owner.accounts.count %> accounts</span>
+              <span class="text-xs text-gray-400"><%= owner.accounts.count %> accounts</span>
               <% if owner.accounts.count == 0 %>
                 <%= button_to settings_owner_path(owner), method: :delete, class: "text-red-500 hover:text-red-700 text-xs font-medium",
                   data: { turbo_confirm: "Delete owner '#{owner.name}'?" } do %>
@@ -31,44 +31,69 @@
     </div>
 
     <!-- Categories -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Categories</h3>
 
-      <%= form_with(model: @new_category, url: settings_categories_path, class: "mb-4 space-y-2") do |f| %>
-        <div class="flex items-center gap-2">
+      <%= form_with(model: @new_category, url: settings_categories_path, class: "mb-6") do |f| %>
+        <div class="flex items-center gap-3">
           <%= f.text_field :name, placeholder: "New category name", required: true,
             class: "flex-1 rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
-          <%= f.number_field :display_order, value: 0, class: "w-20 rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm", placeholder: "Order" %>
-          <label class="flex items-center gap-1 text-sm text-gray-600">
+          <label class="flex items-center gap-1.5 text-sm text-gray-500 whitespace-nowrap">
             <%= f.check_box :is_debt, class: "rounded border-gray-300 text-teal-600 focus:ring-teal-500" %>
             Debt
           </label>
+          <%= f.hidden_field :display_order, value: (@categories.map(&:display_order).max || 0) + 1 %>
           <%= f.submit "Add", class: "bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
         </div>
       <% end %>
 
-      <ul class="divide-y divide-gray-100">
-        <% @categories.each do |category| %>
-          <li class="py-3">
-            <%= form_with(model: category, url: settings_category_path(category), method: :patch, class: "flex items-center gap-2") do |f| %>
-              <%= f.text_field :name, class: "flex-1 rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
-              <%= f.number_field :display_order, class: "w-20 rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
-              <label class="flex items-center gap-1 text-sm text-gray-600">
-                <%= f.check_box :is_debt, class: "rounded border-gray-300 text-teal-600 focus:ring-teal-500" %>
-                Debt
-              </label>
-              <span class="text-xs text-gray-300"><%= category.accounts.count %> accts</span>
-              <%= f.submit "Save", class: "text-teal-600 hover:text-teal-700 text-xs font-medium cursor-pointer" %>
-              <% if category.accounts.count == 0 %>
-                <%= button_to settings_category_path(category), method: :delete, class: "text-red-500 hover:text-red-700 text-xs font-medium",
-                  data: { turbo_confirm: "Delete category '#{category.name}'?" } do %>
-                  Delete
-                <% end %>
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-100">
+            <th class="pb-2 text-left text-xs font-medium text-gray-400 uppercase">Name</th>
+            <th class="pb-2 text-center text-xs font-medium text-gray-400 uppercase w-16">Order</th>
+            <th class="pb-2 text-center text-xs font-medium text-gray-400 uppercase w-16">Type</th>
+            <th class="pb-2 text-right text-xs font-medium text-gray-400 uppercase w-24">Accounts</th>
+            <th class="pb-2 w-24"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <% @categories.each do |category| %>
+            <tr>
+              <%= form_with(model: category, url: settings_category_path(category), method: :patch) do |f| %>
+                <td class="py-3 pr-3">
+                  <%= f.text_field :name, class: "w-full rounded-lg border-gray-200 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+                </td>
+                <td class="py-3 px-2">
+                  <%= f.number_field :display_order, class: "w-full rounded-lg border-gray-200 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm text-center" %>
+                </td>
+                <td class="py-3 px-2 text-center">
+                  <% if category.is_debt? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">Debt</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600">Asset</span>
+                  <% end %>
+                  <%= f.hidden_field :is_debt, value: category.is_debt? %>
+                </td>
+                <td class="py-3 px-2 text-right">
+                  <span class="text-xs text-gray-400"><%= category.accounts.count %></span>
+                </td>
+                <td class="py-3 pl-2 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= f.submit "Save", class: "text-teal-600 hover:text-teal-700 text-xs font-medium cursor-pointer" %>
+                    <% if category.accounts.count == 0 %>
+                      <%= button_to settings_category_path(category), method: :delete, class: "text-red-500 hover:text-red-700 text-xs font-medium",
+                        data: { turbo_confirm: "Delete category '#{category.name}'?" } do %>
+                        Delete
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
               <% end %>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
