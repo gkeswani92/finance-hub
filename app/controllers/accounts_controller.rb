@@ -10,7 +10,7 @@ class AccountsController < ApplicationController
     @accounts = @accounts.joins(:category).order("categories.display_order, accounts.name")
 
     @owners = Owner.all
-    @categories = Category.ordered
+    @categories = Category.all.sort_by { |c| -@accounts.select { |a| a.category_id == c.id }.sum(&:latest_value_usd) }
   end
 
   def show
