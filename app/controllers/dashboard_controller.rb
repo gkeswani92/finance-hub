@@ -30,7 +30,7 @@ class DashboardController < ApplicationController
   def net_worth_change(as_of_date)
     fx_rate = ExchangeRate.latest("USD", "INR")&.rate || 85.0
 
-    accounts = Account.active.includes(:category, :value_snapshots)
+    accounts = Account.includes(:category, :value_snapshots)
     total = accounts.sum do |account|
       snapshot = account.value_snapshots.select { |s| s.snapshot_date <= as_of_date }.max_by(&:snapshot_date)
       value = snapshot&.value || 0
@@ -46,7 +46,7 @@ class DashboardController < ApplicationController
   def asset_change(as_of_date)
     fx_rate = ExchangeRate.latest("USD", "INR")&.rate || 85.0
 
-    accounts = Account.active.includes(:category, :value_snapshots).reject(&:debt?)
+    accounts = Account.includes(:category, :value_snapshots).reject(&:debt?)
     prev_total = accounts.sum do |account|
       snapshot = account.value_snapshots.select { |s| s.snapshot_date <= as_of_date }.max_by(&:snapshot_date)
       value = snapshot&.value || 0

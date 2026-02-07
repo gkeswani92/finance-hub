@@ -6,7 +6,7 @@ module Api
     def net_worth_history
       dates = ValueSnapshot.distinct.pluck(:snapshot_date).sort
       fx_rate = ExchangeRate.latest("USD", "INR")&.rate || 85.0
-      accounts = Account.active.includes(:category, :value_snapshots)
+      accounts = Account.includes(:category, :value_snapshots)
 
       data = dates.map do |date|
         assets = 0.0
