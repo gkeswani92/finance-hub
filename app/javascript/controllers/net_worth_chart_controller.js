@@ -79,14 +79,17 @@ export default class extends Controller {
       .domain(d3.extent(data, d => d.date))
       .range([margin.left, width - margin.right])
 
+    const yMin = d3.min(data, d => Math.min(d.net_worth, d.assets))
+    const yMax = d3.max(data, d => Math.max(d.net_worth, d.assets))
+    const yPad = (yMax - yMin) * 0.1 || yMax * 0.1
     const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.assets) * 1.1])
+      .domain([Math.max(0, yMin - yPad), yMax + yPad])
       .range([height - margin.bottom, margin.top])
 
     // Area for assets
     const area = d3.area()
       .x(d => x(d.date))
-      .y0(y(0))
+      .y0(height - margin.bottom)
       .y1(d => y(d.assets))
       .curve(d3.curveMonotoneX)
 
