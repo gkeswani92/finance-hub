@@ -13,6 +13,11 @@ Rails.application.routes.draw do
   end
 
   get "settings", to: "settings#index"
+  post "settings/owners", to: "settings#create_owner", as: :settings_owners
+  delete "settings/owners/:id", to: "settings#destroy_owner", as: :settings_owner
+  post "settings/categories", to: "settings#create_category", as: :settings_categories
+  patch "settings/categories/:id", to: "settings#update_category", as: :settings_category
+  delete "settings/categories/:id", to: "settings#destroy_category"
 
   # JSON endpoints for charts
   namespace :api do
