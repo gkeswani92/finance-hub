@@ -1,26 +1,26 @@
 <div class="p-8">
-  <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
+  <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-6">Dashboard</h2>
 
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <p class="text-sm font-medium text-gray-500">Total Assets</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1"><%= format_currency(@total_assets) %></p>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Assets</p>
+      <p class="text-4xl font-bold tracking-tight text-gray-900 mt-2"><%= format_currency(@total_assets) %></p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <p class="text-sm font-medium text-gray-500">Total Debts</p>
-      <p class="text-3xl font-bold text-red-600 mt-1"><%= format_currency(@total_debts) %></p>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Total Debts</p>
+      <p class="text-4xl font-bold tracking-tight text-red-500 mt-2"><%= format_currency(@total_debts) %></p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <p class="text-sm font-medium text-gray-500">Net Worth</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1"><%= format_currency(@net_worth) %></p>
-      <div class="mt-2 flex gap-4 text-sm">
-        <span class="<%= @one_day_change >= 0 ? 'text-green-600' : 'text-red-600' %>">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+      <p class="text-xs font-medium uppercase tracking-wider text-gray-400">Net Worth</p>
+      <p class="text-4xl font-bold tracking-tight text-teal-600 mt-2"><%= format_currency(@net_worth) %></p>
+      <div class="mt-3 flex gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= @one_day_change >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' %>">
           1d: <%= @one_day_change >= 0 ? '+' : '' %><%= format_currency(@one_day_change) %>
         </span>
-        <span class="<%= @one_month_change >= 0 ? 'text-green-600' : 'text-red-600' %>">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= @one_month_change >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' %>">
           1m: <%= @one_month_change >= 0 ? '+' : '' %><%= format_currency(@one_month_change) %>
         </span>
       </div>
@@ -28,8 +28,8 @@
   </div>
 
   <!-- Net Worth Chart -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Net Worth Over Time</h3>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Net Worth Over Time</h3>
     <div data-controller="net-worth-chart" data-net-worth-chart-url-value="<%= api_net_worth_history_path %>"
          class="h-80">
       <div data-net-worth-chart-target="canvas"></div>
@@ -37,10 +37,10 @@
   </div>
 
   <!-- Sankey Diagram -->
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Money Flow</h3>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Money Flow</h3>
     <div data-controller="sankey-chart" data-sankey-chart-url-value="<%= api_sankey_data_path %>"
-         class="h-96">
+         style="height: 550px;">
       <div data-sankey-chart-target="canvas"></div>
     </div>
   </div>

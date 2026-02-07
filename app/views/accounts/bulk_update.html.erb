@@ -1,22 +1,22 @@
 <div class="p-8">
-  <h2 class="text-2xl font-bold text-gray-900 mb-2">Bulk Update</h2>
-  <p class="text-sm text-gray-500 mb-6">Update account values for today (<%= Date.current.strftime("%b %d, %Y") %>). Leave blank to skip.</p>
+  <h2 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">Bulk Update</h2>
+  <p class="text-sm text-gray-400 mb-6">Update account values for today (<%= Date.current.strftime("%b %d, %Y") %>). Leave blank to skip.</p>
 
   <%= form_with(url: save_bulk_update_accounts_path, method: :post) do %>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-100">
+        <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Last Value</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase w-48">New Value</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Owner</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Last Value</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase w-48">New Value</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
+        <tbody class="divide-y divide-gray-50">
           <% @accounts.each do |account| %>
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50/50 transition-colors">
               <td class="px-6 py-3 text-sm font-medium text-gray-900"><%= account.name %></td>
               <td class="px-6 py-3 text-sm text-gray-500"><%= account.category.name %></td>
               <td class="px-6 py-3 text-sm text-gray-500"><%= account.owner.name %></td>
@@ -26,7 +26,7 @@
               <td class="px-6 py-3 text-right">
                 <input type="number" name="snapshots[<%= account.id %>]" step="0.01"
                        placeholder="<%= account.latest_value %>"
-                       class="w-full text-right rounded-lg border-gray-300 shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500">
+                       class="w-full text-right rounded-lg border-gray-300 shadow-sm text-sm focus:ring-teal-500 focus:border-teal-500">
               </td>
             </tr>
           <% end %>
@@ -35,7 +35,7 @@
     </div>
 
     <div class="mt-6">
-      <input type="submit" value="Save All" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 cursor-pointer">
+      <input type="submit" value="Save All" class="bg-teal-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors">
     </div>
   <% end %>
 </div>

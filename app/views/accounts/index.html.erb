@@ -1,14 +1,14 @@
 <div class="p-8">
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">Accounts</h2>
-    <%= link_to "New Account", new_account_path, class: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700" %>
+    <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">Accounts</h2>
+    <%= link_to "New Account", new_account_path, class: "bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors" %>
   </div>
 
   <!-- Owner filter tabs -->
   <div class="flex gap-2 mb-6">
-    <%= link_to "All", accounts_path, class: "px-3 py-1.5 rounded-lg text-sm font-medium #{params[:owner_id].blank? ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+    <%= link_to "All", accounts_path, class: "px-3 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:owner_id].blank? ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}" %>
     <% @owners.each do |owner| %>
-      <%= link_to owner.name, accounts_path(owner_id: owner.id), class: "px-3 py-1.5 rounded-lg text-sm font-medium #{params[:owner_id].to_s == owner.id.to_s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+      <%= link_to owner.name, accounts_path(owner_id: owner.id), class: "px-3 py-1.5 rounded-full text-sm font-medium transition-colors #{params[:owner_id].to_s == owner.id.to_s ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}" %>
     <% end %>
   </div>
 
@@ -16,55 +16,95 @@
     <% category_accounts = @accounts.select { |a| a.category_id == category.id } %>
     <% next if category_accounts.empty? %>
 
-    <div class="mb-6">
-      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+    <% category_total_usd = category_accounts.sum(&:latest_value_usd) %>
+    <% category_cost_basis = category_accounts.select(&:cost_basis).sum { |a| a.currency == "USD" ? a.cost_basis : (a.cost_basis / (ExchangeRate.latest("USD", "INR")&.rate || 85.0)) } %>
+
+    <div class="mb-6" data-controller="collapsible">
+      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center cursor-pointer"
+          data-action="click->collapsible#toggle">
+        <svg data-collapsible-target="icon" class="h-4 w-4 mr-1 transition-transform text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
         <%= category.name %>
-        <span class="text-gray-400 font-normal">
-          (<%= format_currency(category_accounts.sum(&:latest_value)) %>)
+        <span class="text-gray-300 font-normal ml-1">
+          (<%= format_currency(category_total_usd) %>)
         </span>
       </h3>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Institution</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Value</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Last Updated</th>
-              <th class="px-6 py-3"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <% category_accounts.each do |account| %>
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                  <%= link_to account.name, account_path(account), class: "hover:text-blue-600" %>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-500"><%= account.owner.name %></td>
-                <td class="px-6 py-4 text-sm text-gray-500"><%= account.institution %></td>
-                <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">
-                  <%= format_currency(account.latest_value, account.currency) %>
-                </td>
-                <td class="px-6 py-4 text-sm text-right text-gray-500">
-                  <%= account.latest_snapshot&.snapshot_date&.strftime("%b %d, %Y") || "—" %>
-                </td>
-                <td class="px-6 py-4 text-right text-sm">
-                  <%= link_to "Edit", edit_account_path(account), class: "text-blue-600 hover:text-blue-800" %>
-                </td>
+      <div data-collapsible-target="body">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <table class="w-full table-fixed divide-y divide-gray-100">
+            <thead>
+              <tr>
+                <th style="width:24%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
+                <th style="width:8%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Owner</th>
+                <th style="width:14%" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Institution</th>
+                <th style="width:12%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Cost Basis</th>
+                <th style="width:14%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Value</th>
+                <th style="width:9%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">CAGR</th>
+                <th style="width:13%" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase">Updated</th>
+                <th style="width:6%" class="px-6 py-3"></th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <% category_accounts.sort_by { |a| -a.latest_value_usd }.each do |account| %>
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate">
+                    <%= link_to account.name, account_path(account), class: "hover:text-teal-600" %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500 truncate"><%= account.owner.name %></td>
+                  <td class="px-6 py-4 text-sm text-gray-500 truncate"><%= account.institution %></td>
+                  <td class="px-6 py-4 text-sm text-right text-gray-500 truncate">
+                    <%= account.cost_basis ? format_currency(account.cost_basis, account.currency) : "—" %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">
+                    <%= format_currency_dual(account) %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-right font-medium truncate overflow-hidden <%= account.cagr && account.cagr >= 0 ? 'text-emerald-600' : account.cagr ? 'text-red-500' : 'text-gray-400' %>">
+                    <%= account.cagr_display %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-right text-gray-400 truncate">
+                    <%= account.latest_snapshot&.snapshot_date&.strftime("%b %d, %Y") || "—" %>
+                  </td>
+                  <td class="px-6 py-4 text-right text-sm">
+                    <%= link_to "Edit", edit_account_path(account), class: "text-teal-600 hover:text-teal-700" %>
+                  </td>
+                </tr>
+              <% end %>
+              <!-- Category subtotal -->
+              <tr class="bg-gray-50/70 font-semibold">
+                <td class="px-6 py-3 text-sm text-gray-500" colspan="3">Subtotal</td>
+                <td class="px-6 py-3 text-sm text-right text-gray-500">
+                  <% if category_cost_basis > 0 %>
+                    <%= format_currency(category_cost_basis) %>
+                  <% end %>
+                </td>
+                <td class="px-6 py-3 text-sm text-right text-gray-900">
+                  <%= format_currency(category_total_usd) %>
+                </td>
+                <td class="px-6 py-3 text-sm text-right">
+                  <% if category_cost_basis > 0 && category_total_usd > 0 %>
+                    <% weighted_return = ((category_total_usd / category_cost_basis) - 1) * 100 %>
+                    <span class="<%= weighted_return >= 0 ? 'text-emerald-600' : 'text-red-500' %>">
+                      <%= format("%+.1f%%", weighted_return) %>
+                    </span>
+                  <% else %>
+                    <span class="text-gray-300">—</span>
+                  <% end %>
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   <% end %>
 
   <% if @accounts.empty? %>
-    <div class="text-center py-12 text-gray-500">
+    <div class="text-center py-12 text-gray-400">
       <p class="text-lg">No accounts yet.</p>
-      <p class="mt-2"><%= link_to "Create your first account", new_account_path, class: "text-blue-600 hover:text-blue-800" %></p>
+      <p class="mt-2"><%= link_to "Create your first account", new_account_path, class: "text-teal-600 hover:text-teal-700" %></p>
     </div>
   <% end %>
 </div>
