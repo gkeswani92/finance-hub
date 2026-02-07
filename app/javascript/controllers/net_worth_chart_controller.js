@@ -50,7 +50,7 @@ export default class extends Controller {
 
     svg.append("path")
       .datum(data)
-      .attr("fill", "rgba(59, 130, 246, 0.15)")
+      .attr("fill", "rgba(13,148,136,0.08)")
       .attr("d", area)
 
     // Net worth line
@@ -62,7 +62,7 @@ export default class extends Controller {
     svg.append("path")
       .datum(data)
       .attr("fill", "none")
-      .attr("stroke", "#2563eb")
+      .attr("stroke", "#0d9488")
       .attr("stroke-width", 2)
       .attr("d", line)
 

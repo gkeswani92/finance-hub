@@ -52,13 +52,13 @@ export default class extends Controller {
 
     svg.append("path")
       .datum(parsed)
-      .attr("fill", "rgba(59, 130, 246, 0.1)")
+      .attr("fill", "rgba(13,148,136,0.08)")
       .attr("d", area)
 
     svg.append("path")
       .datum(parsed)
       .attr("fill", "none")
-      .attr("stroke", "#2563eb")
+      .attr("stroke", "#0d9488")
       .attr("stroke-width", 2)
       .attr("d", line)
 
@@ -69,7 +69,7 @@ export default class extends Controller {
       .attr("cx", d => x(d.date))
       .attr("cy", d => y(d.value))
       .attr("r", 3)
-      .attr("fill", "#2563eb")
+      .attr("fill", "#0d9488")
 
     // Axes
     svg.append("g")

@@ -29,7 +29,7 @@ export default class extends Controller {
 
     const container = this.canvasTarget
     const width = container.parentElement.clientWidth
-    const height = 450
+    const height = 530
     const margin = { top: 10, right: 150, bottom: 10, left: 150 }
 
     const svg = d3.select(container)
