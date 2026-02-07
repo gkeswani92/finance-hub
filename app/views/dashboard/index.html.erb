@@ -68,10 +68,21 @@
   </div>
 
   <!-- Net Worth Chart -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">Net Worth Over Time</h3>
-    <div data-controller="net-worth-chart" data-net-worth-chart-url-value="<%= api_net_worth_history_path %>"
-         class="h-80">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8"
+       data-controller="net-worth-chart" data-net-worth-chart-url-value="<%= api_net_worth_history_path %>">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Worth Over Time</h3>
+      <div class="flex gap-1" data-net-worth-chart-target="periods">
+        <% [["1M", "1m"], ["3M", "3m"], ["1Y", "1y"], ["YTD", "ytd"], ["ALL", "all"]].each do |label, value| %>
+          <button data-action="net-worth-chart#setPeriod" data-period="<%= value %>"
+                  class="px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors
+                         <%= value == 'all' ? 'bg-teal-600 text-white' : 'text-gray-400 hover:bg-gray-100' %>">
+            <%= label %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+    <div class="h-80">
       <div data-net-worth-chart-target="canvas"></div>
     </div>
   </div>

@@ -3,22 +3,67 @@ import * as d3 from "d3"
 
 export default class extends Controller {
   static values = { url: String }
-  static targets = ["canvas"]
+  static targets = ["canvas", "periods"]
 
   connect() {
-    this.draw()
+    this.period = "all"
+    this.load()
   }
 
   disconnect() {
-    d3.select(this.canvasTarget).selectAll("*").remove()
+    this.clearChart()
   }
 
-  async draw() {
-    const data = await fetch(this.urlValue).then(r => r.json())
-    if (!data.length) {
+  async load() {
+    const raw = await fetch(this.urlValue).then(r => r.json())
+    if (!raw.length) {
       this.canvasTarget.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No data yet. Add accounts and record values to see the chart.</p>'
       return
     }
+
+    const parseDate = d3.timeParse("%Y-%m-%d")
+    this.allData = raw.map(d => ({ ...d, date: parseDate(d.date) }))
+    this.render()
+  }
+
+  setPeriod(event) {
+    this.period = event.currentTarget.dataset.period
+    this.periodsTarget.querySelectorAll("button").forEach(btn => {
+      const active = btn.dataset.period === this.period
+      btn.classList.toggle("bg-teal-600", active)
+      btn.classList.toggle("text-white", active)
+      btn.classList.toggle("text-gray-400", !active)
+    })
+    this.render()
+  }
+
+  filterData() {
+    if (!this.allData) return []
+    if (this.period === "all") return this.allData
+
+    const now = new Date()
+    let cutoff
+    switch (this.period) {
+      case "1m":  cutoff = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()); break
+      case "3m":  cutoff = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()); break
+      case "1y":  cutoff = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()); break
+      case "ytd": cutoff = new Date(now.getFullYear(), 0, 1); break
+      default:    return this.allData
+    }
+    return this.allData.filter(d => d.date >= cutoff)
+  }
+
+  clearChart() {
+    const container = this.canvasTarget
+    d3.select(container).selectAll("*").remove()
+    // Remove any tooltip divs we appended
+    container.querySelectorAll("div").forEach(el => el.remove())
+  }
+
+  render() {
+    this.clearChart()
+    const data = this.filterData()
+    if (data.length < 2) return
 
     const container = this.canvasTarget
     const width = container.parentElement.clientWidth
@@ -29,9 +74,6 @@ export default class extends Controller {
       .append("svg")
       .attr("width", width)
       .attr("height", height)
-
-    const parseDate = d3.timeParse("%Y-%m-%d")
-    data.forEach(d => { d.date = parseDate(d.date) })
 
     const x = d3.scaleTime()
       .domain(d3.extent(data, d => d.date))
@@ -98,7 +140,6 @@ export default class extends Controller {
       .attr("class", "absolute pointer-events-none bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-sm")
       .style("opacity", 0)
 
-    // Make container relative for tooltip positioning
     container.style.position = "relative"
 
     const bisect = d3.bisector(d => d.date).left
