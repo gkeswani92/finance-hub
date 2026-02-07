@@ -63,9 +63,10 @@ export default class extends Controller {
       .attr("d", line)
 
     // Dots
-    svg.selectAll("circle")
+    svg.selectAll(".dot")
       .data(parsed)
       .join("circle")
+      .attr("class", "dot")
       .attr("cx", d => x(d.date))
       .attr("cy", d => y(d.value))
       .attr("r", 3)
@@ -81,5 +82,66 @@ export default class extends Controller {
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y).ticks(5).tickFormat(d => `$${d3.format(",")(d)}`))
       .attr("color", "#9ca3af")
+
+    // Hover tooltip
+    const trackLine = svg.append("line")
+      .attr("stroke", "#9ca3af")
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "4,3")
+      .attr("y1", margin.top)
+      .attr("y2", height - margin.bottom)
+      .style("opacity", 0)
+
+    const hoverDot = svg.append("circle")
+      .attr("r", 5)
+      .attr("fill", "#0d9488")
+      .attr("stroke", "white")
+      .attr("stroke-width", 2)
+      .style("opacity", 0)
+
+    const tooltip = d3.select(container)
+      .append("div")
+      .attr("class", "absolute pointer-events-none bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-sm")
+      .style("opacity", 0)
+
+    container.style.position = "relative"
+
+    const bisect = d3.bisector(d => d.date).left
+    const formatCurrency = d3.format(",.0f")
+    const formatDate = d3.timeFormat("%b %d, %Y")
+
+    svg.append("rect")
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .attr("x", margin.left)
+      .attr("y", margin.top)
+      .attr("width", width - margin.left - margin.right)
+      .attr("height", height - margin.top - margin.bottom)
+      .on("mousemove", (event) => {
+        const [mx] = d3.pointer(event)
+        const date = x.invert(mx)
+        const i = Math.min(bisect(parsed, date), parsed.length - 1)
+        const d = i > 0 && (date - parsed[i-1].date) < (parsed[i].date - date) ? parsed[i-1] : parsed[i]
+
+        const cx = x(d.date)
+        const cy = y(d.value)
+
+        trackLine.attr("x1", cx).attr("x2", cx).style("opacity", 1)
+        hoverDot.attr("cx", cx).attr("cy", cy).style("opacity", 1)
+
+        tooltip
+          .html(`
+            <div class="text-xs text-gray-400 font-medium">${formatDate(d.date)}</div>
+            <div class="text-sm font-bold text-teal-600 mt-0.5">$${formatCurrency(d.value)}</div>
+          `)
+          .style("opacity", 1)
+          .style("left", `${Math.min(cx + 12, width - 150)}px`)
+          .style("top", `${cy - 16}px`)
+      })
+      .on("mouseleave", () => {
+        trackLine.style("opacity", 0)
+        hoverDot.style("opacity", 0)
+        tooltip.style("opacity", 0)
+      })
   }
 }
