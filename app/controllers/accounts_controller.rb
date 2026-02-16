@@ -5,14 +5,14 @@ class AccountsController < ApplicationController
   before_action :set_account, only: [:show, :edit, :update, :destroy, :unarchive]
 
   def index
-    @accounts = Account.active.includes(:category, :owner, :value_snapshots)
-    @accounts = @accounts.where(owner_id: params[:owner_id]) if params[:owner_id].present?
+    @accounts = Account.active.includes(:category, :member, :value_snapshots)
+    @accounts = @accounts.where(member_id: params[:member_id]) if params[:member_id].present?
     @accounts = @accounts.joins(:category).order("categories.display_order, accounts.name")
 
-    @owners = Owner.all
+    @members = Member.all
     @categories = Category.all.sort_by { |c| -@accounts.select { |a| a.category_id == c.id }.sum(&:latest_value_usd) }
-    @archived_accounts = Account.where(is_active: false).includes(:category, :owner, :value_snapshots)
-    @archived_accounts = @archived_accounts.where(owner_id: params[:owner_id]) if params[:owner_id].present?
+    @archived_accounts = Account.where(is_active: false).includes(:category, :member, :value_snapshots)
+    @archived_accounts = @archived_accounts.where(member_id: params[:member_id]) if params[:member_id].present?
   end
 
   def show
@@ -60,13 +60,12 @@ class AccountsController < ApplicationController
 
   def unarchive
     @account.update!(is_active: true)
-    # Remove the $0 archive snapshot if it exists for today
     @account.value_snapshots.where(snapshot_date: Date.current, value: 0).destroy_all
     redirect_to(accounts_path, notice: "Account unarchived.")
   end
 
   def bulk_update
-    @accounts = Account.active.includes(:category, :owner, :value_snapshots)
+    @accounts = Account.active.includes(:category, :member, :value_snapshots)
       .joins(:category).order("categories.display_order, accounts.name")
   end
 
@@ -95,7 +94,7 @@ class AccountsController < ApplicationController
   def account_params
     params.require(:account).permit(
       :name,
-      :owner_id,
+      :member_id,
       :category_id,
       :institution,
       :currency,
@@ -106,7 +105,7 @@ class AccountsController < ApplicationController
   end
 
   def load_form_data
-    @owners = Owner.all
+    @members = Member.all
     @categories = Category.ordered
   end
 end

@@ -1,6 +1,6 @@
-<%= form_with(model: account, class: "space-y-6") do |f| %>
+<%= form_with(model: account, class: "space-y-4") do |f| %>
   <% if account.errors.any? %>
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
       <ul class="list-disc list-inside text-sm text-red-600">
         <% account.errors.full_messages.each do |msg| %>
           <li><%= msg %></li>
@@ -9,32 +9,27 @@
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Name</label>
       <%= f.text_field :name, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm", required: true %>
     </div>
-
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Institution</label>
       <%= f.text_field :institution, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
     </div>
-
     <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">Owner</label>
-      <%= f.collection_select :owner_id, @owners, :id, :name, { prompt: "Select owner" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Member</label>
+      <%= f.collection_select :member_id, @members, :id, :name, { prompt: "Select member" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
     </div>
-
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Category</label>
       <%= f.collection_select :category_id, @categories, :id, :name, { prompt: "Select category" }, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
     </div>
-
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Currency</label>
       <%= f.select :currency, [["USD ($)", "USD"], ["INR (₹)", "INR"]], {}, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
     </div>
-
     <div>
       <label class="block text-xs font-medium text-gray-500 mb-1">Cost Basis</label>
       <%= f.number_field :cost_basis, step: 0.01, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
@@ -43,11 +38,11 @@
 
   <div>
     <label class="block text-xs font-medium text-gray-500 mb-1">Notes</label>
-    <%= f.text_area :notes, rows: 3, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
+    <%= f.text_area :notes, rows: 2, class: "w-full rounded-lg border-gray-300 shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm" %>
   </div>
 
   <div class="flex items-center gap-4">
-    <%= f.submit class: "bg-teal-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 cursor-pointer transition-colors" %>
+    <%= f.submit class: "bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 cursor-pointer transition-colors" %>
     <%= link_to "Cancel", accounts_path, class: "text-sm text-gray-400 hover:text-gray-600" %>
   </div>
 <% end %>
