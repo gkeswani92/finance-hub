@@ -3,28 +3,45 @@
 
 class SettingsController < ApplicationController
   def index
-    @owners = Owner.all
+    @members = Member.ordered
     @categories = Category.ordered
-    @new_owner = Owner.new
+    @new_member = Member.new
     @new_category = Category.new
   end
 
-  def create_owner
-    owner = Owner.new(owner_params)
-    if owner.save
-      redirect_to(settings_path, notice: "Owner '#{owner.name}' created.")
+  def create_member
+    member = Member.new(member_params)
+    if member.save
+      redirect_to(settings_path, notice: "Member '#{member.name}' created.")
     else
-      redirect_to(settings_path, alert: owner.errors.full_messages.join(", "))
+      redirect_to(settings_path, alert: member.errors.full_messages.join(", "))
     end
   end
 
-  def destroy_owner
-    owner = Owner.find(params[:id])
-    if owner.destroy
-      redirect_to(settings_path, notice: "Owner '#{owner.name}' deleted.")
+  def update_member
+    member = Member.find(params[:id])
+    if member.update(member_params)
+      redirect_to(settings_path, notice: "Member '#{member.name}' updated.")
     else
-      redirect_to(settings_path, alert: owner.errors.full_messages.join(", "))
+      redirect_to(settings_path, alert: member.errors.full_messages.join(", "))
     end
+  end
+
+  def destroy_member
+    member = Member.find(params[:id])
+    if member.destroy
+      redirect_to(settings_path, notice: "Member '#{member.name}' deleted.")
+    else
+      redirect_to(settings_path, alert: member.errors.full_messages.join(", "))
+    end
+  end
+
+  def reorder_members
+    ids = params[:ids] || []
+    ids.each_with_index do |id, index|
+      Member.where(id: id).update_all(display_order: index + 1)
+    end
+    head(:ok)
   end
 
   def create_category
@@ -62,13 +79,18 @@ class SettingsController < ApplicationController
     head(:ok)
   end
 
+  def update_display_currency
+    session[:display_currency] = params[:currency] == "INR" ? "INR" : "USD"
+    redirect_back(fallback_location: root_path)
+  end
+
   private
 
-  def owner_params
-    params.require(:owner).permit(:name)
+  def member_params
+    params.require(:member).permit(:name, :member_type, :color, :is_active)
   end
 
   def category_params
-    params.require(:category).permit(:name, :display_order, :is_debt)
+    params.require(:category).permit(:name, :display_order, :is_debt, :is_liquid, :icon)
   end
 end
