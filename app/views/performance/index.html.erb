@@ -1,0 +1,86 @@
+<h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Performance</h1>
+
+<!-- Account Returns -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-gray-100">
+    <h3 class="text-sm font-semibold text-gray-900">Account Returns</h3>
+  </div>
+  <% if @accounts.any? %>
+    <table class="w-full divide-y divide-gray-100">
+      <thead>
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Value</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Cost Basis</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Return</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Return %</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">CAGR</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        <% @accounts.each do |account| %>
+          <% gain = account.latest_value - account.cost_basis %>
+          <% gain_pct = account.cost_basis > 0 ? (gain / account.cost_basis * 100) : 0 %>
+          <tr class="hover:bg-gray-50/50 transition-colors">
+            <td class="px-6 py-3">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= link_to account.name, account_path(account), class: "hover:text-teal-600" %></p>
+                <p class="text-xs text-gray-400"><%= account.category&.name %></p>
+              </div>
+            </td>
+            <td class="px-6 py-3 text-sm text-right font-medium text-gray-900"><%= format_currency(account.latest_value_usd) %></td>
+            <td class="px-6 py-3 text-sm text-right text-gray-500"><%= format_currency(account.cost_basis, account.currency) %></td>
+            <td class="px-6 py-3 text-sm text-right font-medium <%= change_color_class(gain) %>">
+              <%= gain >= 0 ? '+' : '' %><%= format_currency(gain.abs, account.currency) %>
+            </td>
+            <td class="px-6 py-3 text-sm text-right font-medium <%= change_color_class(gain_pct) %>">
+              <%= format("%+.1f%%", gain_pct) %>
+            </td>
+            <td class="px-6 py-3 text-sm text-right font-medium <%= account.cagr && account.cagr >= 0 ? 'text-emerald-600' : account.cagr ? 'text-red-500' : 'text-gray-400' %>">
+              <%= account.cagr_display %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="p-8 text-center text-gray-400 text-sm">
+      No accounts with cost basis found. Add a cost basis to your accounts to see performance data.
+    </div>
+  <% end %>
+</div>
+
+<!-- Benchmarks -->
+<% if @benchmarks.any? %>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="text-sm font-semibold text-gray-900">Benchmarks</h3>
+    </div>
+    <table class="w-full divide-y divide-gray-100">
+      <thead>
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Benchmark</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">1Y CAGR</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">3Y CAGR</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">5Y CAGR</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        <% @benchmarks.each do |b| %>
+          <tr class="hover:bg-gray-50/50 transition-colors">
+            <td class="px-6 py-3 text-sm font-medium text-gray-900"><%= b[:name] %></td>
+            <td class="px-6 py-3 text-sm text-right <%= b[:cagr_1y] && b[:cagr_1y] >= 0 ? 'text-emerald-600' : b[:cagr_1y] ? 'text-red-500' : 'text-gray-400' %>">
+              <%= b[:cagr_1y] ? format("%+.1f%%", b[:cagr_1y] * 100) : "--" %>
+            </td>
+            <td class="px-6 py-3 text-sm text-right <%= b[:cagr_3y] && b[:cagr_3y] >= 0 ? 'text-emerald-600' : b[:cagr_3y] ? 'text-red-500' : 'text-gray-400' %>">
+              <%= b[:cagr_3y] ? format("%+.1f%%", b[:cagr_3y] * 100) : "--" %>
+            </td>
+            <td class="px-6 py-3 text-sm text-right <%= b[:cagr_5y] && b[:cagr_5y] >= 0 ? 'text-emerald-600' : b[:cagr_5y] ? 'text-red-500' : 'text-gray-400' %>">
+              <%= b[:cagr_5y] ? format("%+.1f%%", b[:cagr_5y] * 100) : "--" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
