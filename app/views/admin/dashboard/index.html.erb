@@ -1,0 +1,26 @@
+<h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Admin Dashboard</h1>
+
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-6">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 mb-1">Families</p>
+    <p class="text-2xl font-bold tracking-tight text-gray-900"><%= @families_count %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 mb-1">Users</p>
+    <p class="text-2xl font-bold tracking-tight text-gray-900"><%= @profiles_count %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 mb-1">Accounts</p>
+    <p class="text-2xl font-bold tracking-tight text-gray-900"><%= @accounts_count %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <p class="text-xs font-medium text-gray-500 mb-1">Total Net Worth</p>
+    <p class="text-2xl font-bold tracking-tight text-gray-900"><%= format_currency(@total_net_worth) %></p>
+  </div>
+</div>
+
+<div class="flex gap-4">
+  <%= link_to "Manage Users", admin_users_path, class: "text-sm text-teal-600 hover:text-teal-700 font-medium" %>
+  <%= link_to "Manage Families", admin_families_path, class: "text-sm text-teal-600 hover:text-teal-700 font-medium" %>
+  <%= link_to "Exchange Rates", admin_exchange_rates_path, class: "text-sm text-teal-600 hover:text-teal-700 font-medium" %>
+</div>

@@ -1,0 +1,45 @@
+<h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-6">Exchange Rates</h1>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+  <h3 class="text-sm font-semibold text-gray-900 mb-4">Add Rate</h3>
+  <%= form_with(model: ExchangeRate.new, url: admin_exchange_rates_path, class: "flex items-end gap-3") do |f| %>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Base</label>
+      <%= f.text_field :base_currency, value: "USD", class: "w-20 rounded-lg border-gray-300 shadow-sm text-sm" %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Target</label>
+      <%= f.text_field :target_currency, value: "INR", class: "w-20 rounded-lg border-gray-300 shadow-sm text-sm" %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Rate</label>
+      <%= f.number_field :rate, step: 0.000001, class: "w-32 rounded-lg border-gray-300 shadow-sm text-sm" %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Date</label>
+      <%= f.date_field :rate_date, value: Date.current, class: "rounded-lg border-gray-300 shadow-sm text-sm" %>
+    </div>
+    <%= f.submit "Add", class: "bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 cursor-pointer transition-colors" %>
+  <% end %>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <table class="w-full divide-y divide-gray-100">
+    <thead>
+      <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pair</th>
+        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Rate</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      <% @rates.each do |rate| %>
+        <tr class="hover:bg-gray-50/50">
+          <td class="px-6 py-3 text-sm text-gray-900"><%= rate.rate_date.strftime("%b %d, %Y") %></td>
+          <td class="px-6 py-3 text-sm text-gray-500"><%= rate.base_currency %>/<%= rate.target_currency %></td>
+          <td class="px-6 py-3 text-sm text-right font-medium text-gray-900"><%= rate.rate %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
