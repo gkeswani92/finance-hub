@@ -2,12 +2,13 @@
 # frozen_string_literal: true
 
 class Account < ApplicationRecord
-  belongs_to :owner
+  belongs_to :member
   belongs_to :category
+  belongs_to :family, optional: true
   has_many :value_snapshots, dependent: :destroy
   has_many :cash_flows, dependent: :destroy
 
-  validates :name, presence: true, uniqueness: { scope: :owner_id }
+  validates :name, presence: true, uniqueness: { scope: :member_id }
   validates :currency, presence: true, inclusion: { in: ["USD", "INR"] }
 
   scope :active, -> { where(is_active: true) }
