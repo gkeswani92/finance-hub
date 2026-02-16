@@ -16,6 +16,13 @@ class SnapshotsController < ApplicationController
     end
   end
 
+  def destroy
+    @account = Account.find(params[:account_id])
+    @snapshot = @account.value_snapshots.find(params[:id])
+    @snapshot.destroy
+    redirect_to(account_path(@account), notice: "Snapshot deleted.")
+  end
+
   private
 
   def snapshot_params
